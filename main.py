@@ -5,6 +5,7 @@ from matplotlib import pyplot
 from statsmodels.tsa.arima.model import ARIMA
 from pandas.plotting import autocorrelation_plot
 from sklearn.metrics import mean_squared_error
+from statsmodels.tsa.stattools import adfuller
 
 
 # Carregamento dos dados
@@ -21,9 +22,9 @@ print(df.info())
 
 series = df['Sales']
 
-# ARIMA(5, 1, 0)
+# ARIMA(5, 2, 1)
 
-model = ARIMA(series, order=(5, 1, 0))
+model = ARIMA(series, order=(5, 2, 1))
 model_fit = model.fit()
 
 print(model_fit.summary())
@@ -34,8 +35,8 @@ residuals = DataFrame(model_fit.resid)
 residuals.plot()
 pyplot.show()
 
-residuals.plot(kind='kde')
-pyplot.show()
+#residuals.plot(kind='kde')
+#pyplot.show()
 
 print(residuals.describe())
 
@@ -80,7 +81,7 @@ predictions = []
 
 for t in range(len(test)):
 
-    model = ARIMA(history, order=(5, 1, 0))
+    model = ARIMA(history, order=(5, 2, 1))
     model_fit = model.fit()
 
     output = model_fit.forecast()
@@ -102,6 +103,19 @@ pyplot.plot(test)
 pyplot.plot(predictions)
 pyplot.show()
 
+result = adfuller(series)
+
+print("ADF Statistic:", result[0])
+print("p-value:", result[1])
+
+print("Série original:")
+print(adfuller(series)[1])
+
+print("\nPrimeira diferença:")
+print(adfuller(series.diff().dropna())[1])
+
+print("\nSegunda diferença:")
+print(adfuller(series.diff().diff().dropna())[1])
 
 # pyplot.plot(df["Month"], df["Sales"])
 # pyplot.show()
@@ -160,3 +174,4 @@ predicted=672.915, expected=581.300
 predicted=531.541, expected=646.900
 Test RMSE: 89.021
 """
+# ARIMA(5, 1, 1): Test  RMSE: 76.952
