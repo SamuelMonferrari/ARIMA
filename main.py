@@ -16,8 +16,8 @@ df['Month'] = '190' + df['Month']
 df['Month'] = pd.to_datetime(df['Month'])
 
 df = df.set_index('Month')
-# print(df.head())
-# print(df.info())
+print(df.head())
+print(df.info())
 
 series = df['Sales']
 
@@ -66,6 +66,43 @@ rks = autocorrelations.values()
 
 # print(autocorrelations)
 
+# -------------------------------------------------------------------
+# Walk-Forward
+
+X = series.values
+
+size = int(len(X) * 0.66)
+
+train, test = X[0:size], X[size:]
+
+history = [x for x in train]
+predictions = []
+
+for t in range(len(test)):
+
+    model = ARIMA(history, order=(5, 1, 0))
+    model_fit = model.fit()
+
+    output = model_fit.forecast()
+
+    yhat = output[0]
+
+    predictions.append(yhat)
+
+    obs = test[t]
+    history.append(obs)
+
+    print(f'predicted={yhat:.3f}, expected={obs:.3f}')
+
+rmse = mean_squared_error(test, predictions) ** 0.5
+
+print(f'Test RMSE: {rmse:.3f}')
+
+pyplot.plot(test)
+pyplot.plot(predictions)
+pyplot.show()
+
+
 # pyplot.plot(df["Month"], df["Sales"])
 # pyplot.show()
 # pyplot.plot(lags, rks)
@@ -107,4 +144,19 @@ min   -122.292030
 50%     13.147219
 75%     68.848286
 max    266.000000
+
+predicted=343.272, expected=342.300
+predicted=293.330, expected=339.700
+predicted=368.669, expected=440.400
+predicted=335.045, expected=315.900
+predicted=363.220, expected=439.300
+predicted=357.645, expected=401.300
+predicted=443.048, expected=437.400
+predicted=378.366, expected=575.500
+predicted=459.415, expected=407.600
+predicted=526.891, expected=682.000
+predicted=457.231, expected=475.300
+predicted=672.915, expected=581.300
+predicted=531.541, expected=646.900
+Test RMSE: 89.021
 """
